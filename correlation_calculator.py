@@ -6,16 +6,6 @@ def calculate_correlation():
     st.title("Korelasyon Hesaplayıcı")
     st.write("Endeks isimleri ile de  korelasyon bulunabilineceği ve bu korelasyonların günlük getiriler ile hesaplanır(Kullanım yönergesi).")
     tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
-    st.write("Seçilen Ticker Sembolleri:", tickers)
-    
-    tickers_string = st.text_input("Ticker Sembolleri (Virgülle Ayırın):")
-
-    if tickers_string:
-        entered_tickers = tickers_string.split(',')
-        entered_tickers = [ticker.strip().upper() for ticker in entered_tickers]
-        st.write("Girilen Ticker Sembolleri:", entered_tickers)
-
-        
 
     start_date = st.date_input("Başlangıç Tarihi", None)
     end_date = st.date_input("Bitiş Tarihi", None)
