@@ -11,7 +11,7 @@ def calculate_correlation():
     start_date = st.date_input("Başlangıç Tarihi", None)
     end_date = st.date_input("Bitiş Tarihi", None)
 
-    st.write("Endeks isimleri ile de  korelasyon bulunabilineceği ve bu korelasyonların günlük getiriler ile hesaplanır(Kullanım yönergesi).")
+    st.write("Endeks isimleri ile korelasyon bulabilirsiniz ve bu korelasyonların günlük getirilerini hesaplayabilirsiniz.")
 
     tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
     st.write("Girilecek Hisse Sembolleri:", tickers)
@@ -113,10 +113,13 @@ def plot_return():
         # Determine the color based on the value
         continous_color = "green" if return_display_continious >= 0 else "red"
         discrete_color = "green" if return_display_discrete >= 0 else "red"
+
+        continous_percentage = return_display_continious*100
+        discrete_percentage = return_display_discrete*100
     
         # Display the value with the determined color
-        st.write(f"Sürekli Getiri: <span style='color:{continous_color}'>{return_display_continious}</span>", unsafe_allow_html=True)
-        st.write(f"Ayrık Getiri: <span style='color:{discrete_color}'>{return_display_discrete}</span>", unsafe_allow_html=True)
+        st.write(f"Sürekli Getiri: <span style='color:{continous_color}'>{continous_percentage:.2f}%</span>", unsafe_allow_html=True)
+        st.write(f"Ayrık Getiri: <span style='color:{discrete_color}'>{discrete_percentage:.2f}%</span>", unsafe_allow_html=True)
         
 
 def main():
