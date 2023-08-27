@@ -1,26 +1,48 @@
 import streamlit as st
+import pandas as pd
 import yfinance as yf
+import matplotlib.pyplot as plt
+import math
 
 
+tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
+start_date = None
+end_date = None
 
-def calculate_correlation():
-    st.title("Korelasyon Hesaplayıcı")
+def calculate_correlation(tickers, start_date, end_date):
+
+    st.title("Calculate Correlation")
     st.write("Endeks isimleri ile de  korelasyon bulunabilineceği ve bu korelasyonların günlük getiriler ile hesaplanır(Kullanım yönergesi).")
-    tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
+    
+    # Add tickers
+    new_tickers_str = st.text_input("Hisse ekleyin (hisselerin arasına virgül koyabilirsiniz):")
+    if st.button("Hisse Ekle"):
+        if new_tickers_str:
+            new_tickers_list = new_tickers_str.split(',')
+            new_tickers_set = set(new_tickers_list)
+            temp_array = set(tickers)  # Initialize with existing tickers
+            for new_ticker in new_tickers_set:
+                temp = new_ticker.strip().upper()
+                if not temp.endswith(".IS"):
+                    temp += ".IS"
+                temp_array.add(temp)
+            tickers = list(temp_array)  # Convert set back to list
 
-    new_tickers = st.text_input("Hisse ekleyin:")
-    if new_tickers:
-        new_tickers = new_tickers.split(',')
-
-    tickers.extend(new_tickers)
+    # Remove tickers
+    remove_tickers = st.text_input("Hisse çıkarın:")
+    if st.button("Hisse Çıkar"):
+        if remove_tickers:
+            try:
+                tickers.remove(remove_tickers)
+            except ValueError:
+                st.write(f"'{remove_tickers}' not found in the list.")
+    
     st.write("Girilen Ticker Sembolleri:", tickers)
-
-    print(tickers)
-
 
     start_date = st.date_input("Başlangıç Tarihi", None)
     end_date = st.date_input("Bitiş Tarihi", None)
 
+    # Calculate Correlation
     if st.button("Korelasyonu Hesapla"):
         if start_date and end_date:
             stock_data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
@@ -31,18 +53,60 @@ def calculate_correlation():
         else:
             st.write("Lütfen önce bir aralık seçin!")
 
-def calculate_return():
-    st.title("Getiri Hesaplayıcı")
-    st.write("Calculate the return:")
+def plot_return(stock_symbol, start_date, end_date):
 
-tabs = ["Korelasyon Hesaplayıcı", "Çoklu Stok Hesaplayıcı"]
-# Hangi sekmenin seçili olduğunu saklayan değişken
-active_tab = st.radio("İşleminizi seçin:", tabs)
+    st.title("Plot Return")
+    stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
+    
+    # Veri çerçevesini kullanarak fiyat grafiğini çizin
+    plt.figure(figsize=(10, 6))
+    plt.plot(stock_data['Close'])
+    plt.title(f"{stock_symbol} Hisse Senedi Fiyatı")
+    plt.xlabel("Tarih")
+    plt.ylabel("Fiyat")
+    plt.grid()
+    plt.show()
 
-# İlk sekme içeriği
-if active_tab == "Korelasyon Hesaplayıcı":
-    calculate_correlation()
+    st.pyplot(plt.gcf())
 
-# İkinci sekme içeriği
-elif active_tab == "Çoklu Stok Hesaplayıcı":
-    calculate_return()
+    # Getiri hesaplamak için günlük fiyatları kullanın
+    daily_returns = stock_data['Close'].pct_change()
+    
+    # Getiri grafiğini çizin
+    plt.figure(figsize=(10, 6))
+    plt.plot(daily_returns)
+    plt.title(f"{stock_symbol} Hisse Senedi Günlük Getirileri")
+    plt.xlabel("Tarih")
+    plt.ylabel("Getiri")
+    plt.grid()
+    plt.show()
+
+    st.pyplot(plt.gcf())
+    
+    # En son gösterilecek return
+    initial_price = stock_data['Adj Close'][0]
+    final_price = stock_data['Adj Close'][-1]
+    
+    #ayrık getiri
+    return_display_discrete= (final_price/initial_price - 1)
+
+    st.write("Ayrık Getiri", return_display_discrete)
+    
+    #sürekli getiri
+    return_display_continious= math.log(final_price/initial_price)
+    st.write("Sürekli Getiri", return_display_continious)
+
+def main():
+    global tickers
+    global start_date
+    global end_date
+
+    tabs = ["Korelasyon Hesapla", "Plot Returns"]
+    active_tab = st.radio("İşleminizi seçin:", tabs)
+    if active_tab == "Korelasyon Hesapla":
+        calculate_correlation(tickers, start_date, end_date)
+    elif active_tab == "Plot Returns":
+        plot_return(tickers, start_date, end_date)
+
+if __name__ == "__main__":
+    main()
