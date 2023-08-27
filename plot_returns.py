@@ -32,6 +32,8 @@ plt.ylabel("Getiri")
 plt.grid()
 plt.show()
 
+print(stock_data)
+
 #En son gösterilecek return
 initial_price = stock_data['Adj Close'][0]
 final_price = stock_data['Adj Close'][-1]

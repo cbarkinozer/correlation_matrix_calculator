@@ -4,15 +4,14 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import math
 
+def calculate_correlation():
 
-tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
-start_date = None
-end_date = None
-
-def calculate_correlation(tickers, start_date, end_date):
-
-    st.title("Calculate Correlation")
+    st.title("Korelasyon Hesapla")
     st.write("Endeks isimleri ile de  korelasyon bulunabilineceği ve bu korelasyonların günlük getiriler ile hesaplanır(Kullanım yönergesi).")
+
+    tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
+    start_date = None
+    end_date = None
     
     # Add tickers
     new_tickers_str = st.text_input("Hisse ekleyin (hisselerin arasına virgül koyabilirsiniz):")
@@ -53,60 +52,81 @@ def calculate_correlation(tickers, start_date, end_date):
         else:
             st.write("Lütfen önce bir aralık seçin!")
 
-def plot_return(stock_symbol, start_date, end_date):
+def plot_return():
 
-    st.title("Plot Return")
-    stock_data = yf.download(stock_symbol, start=start_date, end=end_date)
-    
-    # Veri çerçevesini kullanarak fiyat grafiğini çizin
-    plt.figure(figsize=(10, 6))
-    plt.plot(stock_data['Close'])
-    plt.title(f"{stock_symbol} Hisse Senedi Fiyatı")
-    plt.xlabel("Tarih")
-    plt.ylabel("Fiyat")
-    plt.grid()
-    plt.show()
+    st.title("Getiri Analizi")
 
-    st.pyplot(plt.gcf())
+    start_date = st.date_input("Başlangıç Tarihi", None)
+    end_date = st.date_input("Bitiş Tarihi", None)
 
-    # Getiri hesaplamak için günlük fiyatları kullanın
-    daily_returns = stock_data['Close'].pct_change()
-    
-    # Getiri grafiğini çizin
-    plt.figure(figsize=(10, 6))
-    plt.plot(daily_returns)
-    plt.title(f"{stock_symbol} Hisse Senedi Günlük Getirileri")
-    plt.xlabel("Tarih")
-    plt.ylabel("Getiri")
-    plt.grid()
-    plt.show()
+    new_ticker_str = st.text_input("Tek bir hisse ekleyin:")
+    stock = None
+    if st.button("Getiri Hesapla"):
+        stock_symbol = new_ticker_str.strip().upper()
+        if not stock_symbol.endswith(".IS"):
+            stock_symbol += ".IS"
+        stock = stock_symbol
+        st.write("Seçilen Hisse:", stock_symbol)
+        print(stock)
+        stock_data = yf.download(stock, start=start_date, end=end_date)
+        # Veri çerçevesini kullanarak fiyat grafiğini çizin
+        plt.figure(figsize=(10, 6))
+        plt.plot(stock_data['Close'])
+        plt.title(f"{stock_symbol} Hisse Senedi Fiyatı")
+        plt.xlabel("Tarih")
+        plt.ylabel("Fiyat")
+        plt.grid()
+        plt.show()
 
-    st.pyplot(plt.gcf())
-    
-    # En son gösterilecek return
-    initial_price = stock_data['Adj Close'][0]
-    final_price = stock_data['Adj Close'][-1]
-    
-    #ayrık getiri
-    return_display_discrete= (final_price/initial_price - 1)
+        st.pyplot(plt.gcf())
 
-    st.write("Ayrık Getiri", return_display_discrete)
+        # Getiri hesaplamak için günlük fiyatları kullanın
+        daily_returns = stock_data['Close'].pct_change()
+
+        # Getiri grafiğini çizin
+        plt.figure(figsize=(10, 6))
+        plt.plot(daily_returns)
+        plt.title(f"{stock_symbol} Hisse Senedi Günlük Getirileri")
+        plt.xlabel("Tarih")
+        plt.ylabel("Getiri")
+        plt.grid()
+        plt.show()
+
+        st.pyplot(plt.gcf())
+
+        # En son gösterilecek return
+        initial_price = stock_data['Adj Close'][0]
+        final_price = stock_data['Adj Close'][-1]
     
-    #sürekli getiri
-    return_display_continious= math.log(final_price/initial_price)
-    st.write("Sürekli Getiri", return_display_continious)
+        #ayrık getiri
+        return_display_discrete= (final_price/initial_price - 1)
+    
+        #sürekli getiri
+        return_display_continious= math.log(final_price/initial_price)
+
+        # Determine the color based on the value
+        continous_color = "green" if return_display_continious >= 0 else "red"
+        discrete_color = "green" if return_display_discrete >= 0 else "red"
+    
+        # Display the value with the determined color
+        st.write(f"Sürekli Getiri: <span style='color:{continous_color}'>{return_display_continious}</span>", unsafe_allow_html=True)
+        st.write(f"Ayrık Getiri: <span style='color:{discrete_color}'>{return_display_discrete}</span>", unsafe_allow_html=True)
+        
 
 def main():
-    global tickers
-    global start_date
-    global end_date
 
-    tabs = ["Korelasyon Hesapla", "Plot Returns"]
+    tabs = ["Korelasyon Hesaplayıcı", "Getiri Analizi"]
+    # Hangi sekmenin seçili olduğunu saklayan değişken
     active_tab = st.radio("İşleminizi seçin:", tabs)
-    if active_tab == "Korelasyon Hesapla":
-        calculate_correlation(tickers, start_date, end_date)
-    elif active_tab == "Plot Returns":
-        plot_return(tickers, start_date, end_date)
+    
+    # İlk sekme içeriği
+    if active_tab == "Korelasyon Hesaplayıcı":
+        calculate_correlation()
+    
+    # İkinci sekme içeriği
+    elif active_tab == "Getiri Analizi":
+        plot_return()
+        
 
 if __name__ == "__main__":
     main()
