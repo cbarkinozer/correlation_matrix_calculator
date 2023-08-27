@@ -54,7 +54,16 @@ def calculate_correlation():
             correlation_matrix = stock_data.corr()
             st.title("Matrix Data Display App")
             st.write("Matrix Data:")
-            st.table(correlation_matrix)
+
+            def color_map(val):
+                color = f'background-color: rgba(0, 200, 0, {val})'
+                return color
+
+            # Apply color_map function to the correlation matrix DataFrame
+            styled_correlation_matrix = correlation_matrix.style.applymap(color_map)
+
+            # Display the styled correlation matrix
+            st.table(styled_correlation_matrix)
         else:
             st.write("Lütfen önce bir aralık seçin!")     
 
