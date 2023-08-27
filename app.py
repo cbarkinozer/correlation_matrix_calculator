@@ -7,15 +7,21 @@ import math
 def calculate_correlation():
 
     st.title("Korelasyon Hesapla")
+
+    start_date = st.date_input("Başlangıç Tarihi", None)
+    end_date = st.date_input("Bitiş Tarihi", None)
+
     st.write("Endeks isimleri ile de  korelasyon bulunabilineceği ve bu korelasyonların günlük getiriler ile hesaplanır(Kullanım yönergesi).")
 
     tickers = ['CCOLA.IS', 'XU030.IS', 'SISE.IS', 'THYAO.IS', 'XU100.IS']
-    start_date = None
-    end_date = None
-    
+    st.write("Girilecek Hisse Sembolleri:", tickers)
+
     # Add tickers
     new_tickers_str = st.text_input("Hisse ekleyin (hisselerin arasına virgül koyabilirsiniz):")
-    if st.button("Hisse Ekle"):
+    remove_tickers = st.text_input("Hisse çıkarın:")
+    
+    if st.button("Hisseleri Güncelle ve Korelasyon Hesapla"):
+        
         if new_tickers_str:
             new_tickers_list = new_tickers_str.split(',')
             new_tickers_set = set(new_tickers_list)
@@ -25,24 +31,24 @@ def calculate_correlation():
                 if not temp.endswith(".IS"):
                     temp += ".IS"
                 temp_array.add(temp)
-            tickers = list(temp_array)  # Convert set back to list
-
-    # Remove tickers
-    remove_tickers = st.text_input("Hisse çıkarın:")
-    if st.button("Hisse Çıkar"):
+            tickers = list(temp_array)
+        
         if remove_tickers:
-            try:
-                tickers.remove(remove_tickers)
-            except ValueError:
-                st.write(f"'{remove_tickers}' not found in the list.")
-    
-    st.write("Girilen Ticker Sembolleri:", tickers)
+            remove_tickers_list = remove_tickers.split(',')
+            remove_tickers_set = set(remove_tickers_list)
+            temp_array = set(tickers)
+            for new_ticker in remove_tickers_set:
+                temp = new_ticker.strip().upper()
+                if not temp.endswith(".IS"):
+                    temp += ".IS"
+                try:
+                    temp_array.remove(temp)
+                except ValueError:
+                    st.write(f"'{remove_tickers}' not found in the list.")
+            tickers = list(temp_array)           
+        
+        st.write("Girilecek Hisse Sembolleri:", tickers)
 
-    start_date = st.date_input("Başlangıç Tarihi", None)
-    end_date = st.date_input("Bitiş Tarihi", None)
-
-    # Calculate Correlation
-    if st.button("Korelasyonu Hesapla"):
         if start_date and end_date:
             stock_data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
             correlation_matrix = stock_data.corr()
@@ -50,7 +56,7 @@ def calculate_correlation():
             st.write("Matrix Data:")
             st.table(correlation_matrix)
         else:
-            st.write("Lütfen önce bir aralık seçin!")
+            st.write("Lütfen önce bir aralık seçin!")     
 
 def plot_return():
 
